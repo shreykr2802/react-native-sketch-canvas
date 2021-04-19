@@ -126,13 +126,16 @@ export interface RNSketchCanvasProps {
   onUndoPressed?: (id: number) => void
   onClearPressed?: () => void
   onPathsChange?: (pathsCount: number) => void
+  saveAndContinue?: (uri: string) => void
   user?: string
+  base64Img?: string
 
   closeComponent?: JSX.Element,
   eraseComponent?: JSX.Element,
   undoComponent?: JSX.Element,
   clearComponent?: JSX.Element,
   saveComponent?: JSX.Element,
+  pencilComponent?: JSX.Element,
   strokeComponent?: (color: string) => JSX.Element
   strokeSelectedComponent?: (color: string, index: number, changed: boolean) => JSX.Element
   strokeWidthComponent?: (width: number) => JSX.Element
@@ -177,3 +180,4 @@ export default class RNSketchCanvas extends React.Component<RNSketchCanvasProps 
   static LIBRARY: string
   static CACHES: string
 }
+

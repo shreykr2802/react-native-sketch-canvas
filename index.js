@@ -6,9 +6,13 @@ import ReactNative, {
   TouchableOpacity,
   FlatList,
   ViewPropTypes,
+  Image
 } from 'react-native'
 import SketchCanvas from './src/SketchCanvas'
 import { requestPermissions } from './src/handlePermissions';
+
+import ViewShot, { captureRef } from "react-native-view-shot";
+import FooterButton from 'src/components/Button/FooterButton';
 
 export default class RNSketchCanvas extends React.Component {
   static propTypes = {
@@ -22,15 +26,18 @@ export default class RNSketchCanvas extends React.Component {
     onClearPressed: PropTypes.func,
     onPathsChange: PropTypes.func,
     user: PropTypes.string,
+    base64Img: PropTypes.string,
 
     closeComponent: PropTypes.node,
     eraseComponent: PropTypes.node,
     undoComponent: PropTypes.node,
     clearComponent: PropTypes.node,
     saveComponent: PropTypes.node,
+    pencilComponent: PropTypes.node,
     strokeComponent: PropTypes.func,
     strokeSelectedComponent: PropTypes.func,
     strokeWidthComponent: PropTypes.func,
+    saveAndContinue: PropTypes.func,
 
     strokeColors: PropTypes.arrayOf(PropTypes.shape({ color: PropTypes.string })),
     defaultStrokeIndex: PropTypes.number,
@@ -71,13 +78,16 @@ export default class RNSketchCanvas extends React.Component {
     onUndoPressed: () => { },
     onClearPressed: () => { },
     onPathsChange: () => { },
+    saveAndContinue: () => { },
     user: null,
+    base64Img: null,
 
     closeComponent: null,
     eraseComponent: null,
     undoComponent: null,
     clearComponent: null,
     saveComponent: null,
+    pencilComponent: null,
     strokeComponent: null,
     strokeSelectedComponent: null,
     strokeWidthComponent: null,
@@ -131,7 +141,9 @@ export default class RNSketchCanvas extends React.Component {
 
     this._colorChanged = false
     this._strokeWidthStep = props.strokeWidthStep
-    this._alphaStep = -1
+    this._alphaStep = -1;
+
+    this.viewShot = React.createRef();
   }
 
   clear() {
@@ -156,7 +168,7 @@ export default class RNSketchCanvas extends React.Component {
       this._sketchCanvas.save(p.imageType, p.transparent, p.folder ? p.folder : '', p.filename, p.includeImage !== false, p.includeText !== false, p.cropToImageSize || false)
     } else {
       const date = new Date()
-      this._sketchCanvas.save('png', false, '', 
+      this._sketchCanvas.save('png', false, '',
         date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + ('0' + date.getDate()).slice(-2) + ' ' + ('0' + date.getHours()).slice(-2) + '-' + ('0' + date.getMinutes()).slice(-2) + '-' + ('0' + date.getSeconds()).slice(-2),
         true, true, false)
     }
@@ -201,36 +213,42 @@ export default class RNSketchCanvas extends React.Component {
     );
   }
 
+  captureAndShareScreenshot = uri => {
+    captureRef(this.viewShot, {
+      format: "jpg",
+      quality: 0.8,
+      result: "data-uri"
+    }).then(
+      uri => console.log("Image saved to", uri),
+      error => console.error("Oops, snapshot failed", error)
+    );
+  }
+
   render() {
     return (
       <View style={this.props.containerStyle}>
         <View style={{ flexDirection: 'row' }}>
-          <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-start' }}>
-            {this.props.closeComponent && (
-              <TouchableOpacity onPress={() => { this.props.onClosePressed() }}>
-                {this.props.closeComponent}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', width: '100%', marginTop: 30 }}>
+            {this.props.pencilComponent && (
+              <TouchableOpacity onPress={() => { this.setState({ color: '#00000000' }) }}>
+                {this.props.pencilComponent}
               </TouchableOpacity>)
             }
-
             {this.props.eraseComponent && (
               <TouchableOpacity onPress={() => { this.setState({ color: '#00000000' }) }}>
                 {this.props.eraseComponent}
               </TouchableOpacity>)
             }
-          </View>
-          <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end' }}>
-            {this.props.strokeWidthComponent && (
-              <TouchableOpacity onPress={() => { this.nextStrokeWidth() }}>
-                {this.props.strokeWidthComponent(this.state.strokeWidth)}
-              </TouchableOpacity>)
-            }
-
             {this.props.undoComponent && (
               <TouchableOpacity onPress={() => { this.props.onUndoPressed(this.undo()) }}>
                 {this.props.undoComponent}
               </TouchableOpacity>)
             }
-
+            {this.props.strokeWidthComponent && (
+              <TouchableOpacity onPress={() => { this.nextStrokeWidth() }}>
+                {this.props.strokeWidthComponent(this.state.strokeWidth)}
+              </TouchableOpacity>)
+            }
             {this.props.clearComponent && (
               <TouchableOpacity onPress={() => { this.clear(); this.props.onClearPressed() }}>
                 {this.props.clearComponent}
@@ -238,38 +256,46 @@ export default class RNSketchCanvas extends React.Component {
             }
 
             {this.props.saveComponent && (
-              <TouchableOpacity onPress={() => { this.save() }}>
+              <TouchableOpacity onPress={(uri) => { this.captureAndShareScreenshot(uri) }}>
                 {this.props.saveComponent}
               </TouchableOpacity>)
             }
+            <View style={{ flexDirection: 'row' }}>
+              <FlatList
+                data={this.props.strokeColors}
+                extraData={this.state}
+                keyExtractor={() => Math.ceil(Math.random() * 10000000).toString()}
+                renderItem={this._renderItem}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
           </View>
         </View>
-        <SketchCanvas
-          ref={ref => this._sketchCanvas = ref}
-          style={this.props.canvasStyle}
-          strokeColor={this.state.color + (this.state.color.length === 9 ? '' : this.state.alpha)}
-          onStrokeStart={this.props.onStrokeStart}
-          onStrokeChanged={this.props.onStrokeChanged}
-          onStrokeEnd={this.props.onStrokeEnd}
-          user={this.props.user}
-          strokeWidth={this.state.strokeWidth}
-          onSketchSaved={(success, path) => this.props.onSketchSaved(success, path)}
-          onPathsChange={this.props.onPathsChange}
-          text={this.props.text}
-          localSourceImage={this.props.localSourceImage}
-          permissionDialogTitle={this.props.permissionDialogTitle}
-          permissionDialogMessage={this.props.permissionDialogMessage}
-        />
-        <View style={{ flexDirection: 'row' }}>
-          <FlatList
-            data={this.props.strokeColors}
-            extraData={this.state}
-            keyExtractor={() => Math.ceil(Math.random() * 10000000).toString()}
-            renderItem={this._renderItem}
-            horizontal
-            showsHorizontalScrollIndicator={false}
+          <Image style={{
+            position: 'absolute',
+            marginTop: 100,
+            opacity: 1,
+            height: '90%',
+            width: '100%'
+          }} source={{ uri: `data:image/jpg;base64,${this.props.base64Img}` }} />
+
+          <SketchCanvas
+            ref={ref => this._sketchCanvas = ref}
+            style={this.props.canvasStyle}
+            strokeColor={this.state.color + (this.state.color.length === 9 ? '' : this.state.alpha)}
+            onStrokeStart={this.props.onStrokeStart}
+            onStrokeChanged={this.props.onStrokeChanged}
+            onStrokeEnd={this.props.onStrokeEnd}
+            user={this.props.user}
+            strokeWidth={this.state.strokeWidth}
+            onSketchSaved={(success, path) => this.props.onSketchSaved(success, path)}
+            onPathsChange={this.props.onPathsChange}
+            text={this.props.text}
+            localSourceImage={this.props.localSourceImage}
+            permissionDialogTitle={this.props.permissionDialogTitle}
+            permissionDialogMessage={this.props.permissionDialogMessage}
           />
-        </View>
       </View>
     );
   }
@@ -283,3 +309,4 @@ RNSketchCanvas.CACHES = SketchCanvas.CACHES;
 export {
   SketchCanvas
 }
+

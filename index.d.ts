@@ -133,7 +133,6 @@ export interface RNSketchCanvasProps {
   setBase64ImageNotes: (uri: string) => void,
   setBase64ImageClickedPicked: (uri: string) => void,
   closeModal: (close: boolean) => void,
-  buttonTextStyle?: StyleProp<TextStyle>,
 
   closeComponent?: JSX.Element,
   eraseComponent?: JSX.Element,

@@ -31,7 +31,6 @@ export default class RNSketchCanvas extends React.Component {
     setBase64ImageNotes: PropTypes.func,
     setBase64ImageClickedPicked: PropTypes.func,
     closeModal: PropTypes.func,
-    buttonTextStyle: TextPropTypes.style,
 
     closeComponent: PropTypes.node,
     eraseComponent: PropTypes.node,
@@ -86,7 +85,6 @@ export default class RNSketchCanvas extends React.Component {
     saveAndContinue: () => { },
     user: null,
     base64Img: null,
-    buttonTextStyle: null,
 
     closeComponent: null,
     eraseComponent: null,
@@ -234,17 +232,6 @@ export default class RNSketchCanvas extends React.Component {
     );
   }
 
-  FooterButton = ({ ButtonName, onPressAction }) => {
-    return (
-      <TouchableHighlight style={{
-        borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
-      }}
-        onPress={onPressAction} underlayColor='#F36F27'>
-        <Text style={[Fonts.style.normalBold, styles.clearColor]}>{ButtonName}</Text>
-      </TouchableHighlight>
-    );
-  };
-
   render() {
     return (
       <View style={this.props.containerStyle}>
@@ -329,7 +316,7 @@ export default class RNSketchCanvas extends React.Component {
               borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
             }}
               onPress={(uri) => this.captureAndShareScreenshot(uri)} underlayColor='#F36F27'>
-              <Text style={this.props.buttonTextStyle}>Save And Continue</Text>
+              <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>Save And Continue</Text>
             </TouchableHighlight>
           </>
           <>
@@ -337,7 +324,7 @@ export default class RNSketchCanvas extends React.Component {
               borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
             }}
               onPress={() => this.props.closeModal(false)} underlayColor='#F36F27'>
-              <Text style={this.props.buttonTextStyle}>Close</Text>
+              <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>Close</Text>
             </TouchableHighlight>
           </>
         </View>

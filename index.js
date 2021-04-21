@@ -6,13 +6,14 @@ import ReactNative, {
   TouchableOpacity,
   FlatList,
   ViewPropTypes,
-  Image
+  Image,
+  TouchableHighlight,
+  TextPropTypes
 } from 'react-native'
 import SketchCanvas from './src/SketchCanvas'
 import { requestPermissions } from './src/handlePermissions';
 
 import ViewShot, { captureRef } from "react-native-view-shot";
-import FooterButton from 'src/components/Button/FooterButton';
 
 export default class RNSketchCanvas extends React.Component {
   static propTypes = {
@@ -27,6 +28,10 @@ export default class RNSketchCanvas extends React.Component {
     onPathsChange: PropTypes.func,
     user: PropTypes.string,
     base64Img: PropTypes.string,
+    setBase64ImageNotes: PropTypes.func,
+    setBase64ImageClickedPicked: PropTypes.func,
+    closeModal: PropTypes.func,
+    buttonTextStyle: TextPropTypes.style,
 
     closeComponent: PropTypes.node,
     eraseComponent: PropTypes.node,
@@ -81,6 +86,7 @@ export default class RNSketchCanvas extends React.Component {
     saveAndContinue: () => { },
     user: null,
     base64Img: null,
+    buttonTextStyle: null,
 
     closeComponent: null,
     eraseComponent: null,
@@ -219,10 +225,25 @@ export default class RNSketchCanvas extends React.Component {
       quality: 0.8,
       result: "data-uri"
     }).then(
-      uri => console.log("Image saved to", uri),
+      uri => {
+        this.props.setBase64ImageNotes(uri);
+        this.props.closeModal(false);
+        this.props.setBase64ImageClickedPicked('');
+      },
       error => console.error("Oops, snapshot failed", error)
     );
   }
+
+  FooterButton = ({ ButtonName, onPressAction }) => {
+    return (
+      <TouchableHighlight style={{
+        borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
+      }}
+        onPress={onPressAction} underlayColor='#F36F27'>
+        <Text style={[Fonts.style.normalBold, styles.clearColor]}>{ButtonName}</Text>
+      </TouchableHighlight>
+    );
+  };
 
   render() {
     return (
@@ -272,14 +293,19 @@ export default class RNSketchCanvas extends React.Component {
             </View>
           </View>
         </View>
+        <ViewShot
+          style={{
+            height: '90%',
+            width: '100%',
+          }}
+          ref={this.viewShot}
+          options={{ format: 'jpg', quality: 1.0 }}>
           <Image style={{
             position: 'absolute',
-            marginTop: 100,
             opacity: 1,
-            height: '90%',
+            height: '100%',
             width: '100%'
           }} source={{ uri: `data:image/jpg;base64,${this.props.base64Img}` }} />
-
           <SketchCanvas
             ref={ref => this._sketchCanvas = ref}
             style={this.props.canvasStyle}
@@ -296,6 +322,25 @@ export default class RNSketchCanvas extends React.Component {
             permissionDialogTitle={this.props.permissionDialogTitle}
             permissionDialogMessage={this.props.permissionDialogMessage}
           />
+        </ViewShot>
+        <View style={{ marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+          <>
+            <TouchableHighlight style={{
+              borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
+            }}
+              onPress={(uri) => this.captureAndShareScreenshot(uri)} underlayColor='#F36F27'>
+              <Text style={this.props.buttonTextStyle}>Save And Continue</Text>
+            </TouchableHighlight>
+          </>
+          <>
+            <TouchableHighlight style={{
+              borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
+            }}
+              onPress={() => this.props.closeModal(false)} underlayColor='#F36F27'>
+              <Text style={this.props.buttonTextStyle}>Close</Text>
+            </TouchableHighlight>
+          </>
+        </View>
       </View>
     );
   }

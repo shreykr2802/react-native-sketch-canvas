@@ -2,7 +2,8 @@ import * as React from 'react'
 import {
   ViewProperties,
   StyleProp,
-  ViewStyle
+  ViewStyle,
+  TextStyle
 } from "react-native"
 
 type ImageType = 'png' | 'jpg'
@@ -129,6 +130,10 @@ export interface RNSketchCanvasProps {
   saveAndContinue?: (uri: string) => void
   user?: string
   base64Img?: string
+  setBase64ImageNotes: (uri: string) => void,
+  setBase64ImageClickedPicked: (uri: string) => void,
+  closeModal: (close: boolean) => void,
+  buttonTextStyle?: StyleProp<TextStyle>,
 
   closeComponent?: JSX.Element,
   eraseComponent?: JSX.Element,
@@ -140,7 +145,7 @@ export interface RNSketchCanvasProps {
   strokeSelectedComponent?: (color: string, index: number, changed: boolean) => JSX.Element
   strokeWidthComponent?: (width: number) => JSX.Element
 
-  strokeColors?: {color: string}[]
+  strokeColors?: { color: string }[]
   defaultStrokeIndex?: number
   defaultStrokeWidth?: number
 
@@ -153,7 +158,7 @@ export interface RNSketchCanvasProps {
    * @param includeImage default true
    * @param cropToImageSize default false
    */
-  savePreference?: () => {folder: string, filename: string, transparent: boolean, imageType: ImageType, includeImage?: boolean, includeText?: boolean, cropToImageSize?: boolean}
+  savePreference?: () => { folder: string, filename: string, transparent: boolean, imageType: ImageType, includeImage?: boolean, includeText?: boolean, cropToImageSize?: boolean }
   onSketchSaved?: (result: boolean, path: string) => void
 
   text?: CanvasText[]

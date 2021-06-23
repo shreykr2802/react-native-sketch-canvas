@@ -220,12 +220,12 @@ export default class RNSketchCanvas extends React.Component {
   captureAndShareScreenshot = uri => {
     captureRef(this.viewShot, {
       format: "jpg",
-      quality: 0.8,
+      quality: 1,
       result: "data-uri"
     }).then(
       uri => {
         this.props.setBase64ImageNotes(uri);
-        this.props.closeModal(false);
+        this.props.closeModal(false, false);
         this.props.setBase64ImageClickedPicked('');
       },
       error => console.error("Oops, snapshot failed", error)
@@ -323,7 +323,7 @@ export default class RNSketchCanvas extends React.Component {
             <TouchableHighlight style={{
               borderWidth: 1, borderColor: '#F36F27', backgroundColor: '#F36F27', borderRadius: 25, marginRight: 30, minWidth: 300, height: 50, alignItems: 'center', justifyContent: 'center'
             }}
-              onPress={() => this.props.closeModal(false)} underlayColor='#F36F27'>
+              onPress={() => this.props.closeModal(false, true)} underlayColor='#F36F27'>
               <Text style={{ fontSize: 16, color: 'white', fontWeight: 'bold' }}>Close</Text>
             </TouchableHighlight>
           </>

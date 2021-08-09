@@ -220,12 +220,12 @@ export default class RNSketchCanvas extends React.Component {
   captureAndShareScreenshot = uri => {
     captureRef(this.viewShot, {
       format: "jpg",
-      quality: 1,
+      quality: 0.8,
       result: "data-uri"
     }).then(
       uri => {
         this.props.setBase64ImageNotes(uri);
-        this.props.closeModal(false, false);
+        this.props.closeModal(false);
         this.props.setBase64ImageClickedPicked('');
       },
       error => console.error("Oops, snapshot failed", error)
@@ -268,7 +268,7 @@ export default class RNSketchCanvas extends React.Component {
                 {this.props.saveComponent}
               </TouchableOpacity>)
             }
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: 'row', width: '70%' }}>
               <FlatList
                 data={this.props.strokeColors}
                 extraData={this.state}
@@ -341,4 +341,3 @@ RNSketchCanvas.CACHES = SketchCanvas.CACHES;
 export {
   SketchCanvas
 }
-

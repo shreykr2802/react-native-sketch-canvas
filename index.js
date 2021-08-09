@@ -225,7 +225,7 @@ export default class RNSketchCanvas extends React.Component {
     }).then(
       uri => {
         this.props.setBase64ImageNotes(uri);
-        this.props.closeModal(false);
+        this.props.closeModal(false, false);
         this.props.setBase64ImageClickedPicked('');
       },
       error => console.error("Oops, snapshot failed", error)
@@ -341,3 +341,4 @@ RNSketchCanvas.CACHES = SketchCanvas.CACHES;
 export {
   SketchCanvas
 }
+
